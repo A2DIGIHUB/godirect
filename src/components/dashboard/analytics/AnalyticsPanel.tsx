@@ -11,16 +11,16 @@ import {
   Users, 
   DollarSign, 
   CheckSquare, 
-  AlertTriangle, 
-  TrendingUp, 
-  TrendingDown, 
-  Landmark, 
-  BarChart3, 
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  Landmark,
+  BarChart3,
   PieChart,
   Calendar,
   RefreshCw
 } from 'lucide-react';
-import { formatTrendIcon } from '../DashboardIcons';
+import { formatCurrency } from '@/utils/formatUtils';
 
 export default function AnalyticsPanel() {
   // Fetch dashboard stats from Supabase
@@ -47,7 +47,7 @@ export default function AnalyticsPanel() {
   // Fetch revenue metrics
   const { 
     data: revenueMetrics, 
-    isLoading: revenueLoading 
+    isLoading: isLoadingRevenue 
   } = useQuery({
     queryKey: ['revenueMetrics'],
     queryFn: async () => {
@@ -57,11 +57,19 @@ export default function AnalyticsPanel() {
         .order('metric_date', { ascending: false })
         .limit(30);
       
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       
-      return data;
+      const metrics = data?.[0] || {};
+      return {
+        totalRevenue: formatCurrency(metrics.revenue || 0),
+        commissions: formatCurrency((metrics.revenue || 0) * 0.09),
+        expenses: formatCurrency((metrics.revenue || 0) * 0.03),
+        profitMargin: `${metrics.completion_percentage?.toFixed(1) || 0}%`,
+        revenueChange: metrics.change_percentage || 0,
+        commissionChange: (metrics.change_percentage || 0) * 0.9,
+        expenseChange: (metrics.change_percentage || 0) * 0.4,
+        marginChange: (metrics.change_percentage || 0) * 0.2
+      };
     }
   });
 
@@ -147,6 +155,99 @@ export default function AnalyticsPanel() {
       console.error("Error refreshing dashboard:", error);
     }
   };
+
+  const DailyMetricsContent = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Today's Revenue</p>
+        <p className="text-2xl font-bold">{formatCurrency(24500)}</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+12% from yesterday</span>
+        </div>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Properties Viewed</p>
+        <p className="text-2xl font-bold">342</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+5% from yesterday</span>
+        </div>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">New Inquiries</p>
+        <p className="text-2xl font-bold">28</p>
+        <div className="flex items-center mt-2 text-xs text-red-500">
+          <TrendingDown className="h-3 w-3 mr-1" />
+          <span>-3% from yesterday</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MonthlyMetricsContent = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Month Revenue</p>
+        <p className="text-2xl font-bold">{formatCurrency(493200)}</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+8% from last month</span>
+        </div>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Properties Sold</p>
+        <p className="text-2xl font-bold">42</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+12% from last month</span>
+        </div>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Average Price</p>
+        <p className="text-2xl font-bold">{formatCurrency(383000)}</p>
+        <div className="flex items-center mt-2 text-xs text-red-500">
+          <TrendingDown className="h-3 w-3 mr-1" />
+          <span>-2% from last month</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const YearlyMetricsContent = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Annual Revenue</p>
+        <p className="text-2xl font-bold">{formatCurrency(5200000)}</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+15% from last year</span>
+        </div>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Total Properties Sold</p>
+        <p className="text-2xl font-bold">482</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+9% from last year</span>
+        </div>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <p className="text-sm text-muted-foreground">Market Share</p>
+        <p className="text-2xl font-bold">24.3%</p>
+        <div className="flex items-center mt-2 text-xs text-green-500">
+          <TrendingUp className="h-3 w-3 mr-1" />
+          <span>+2.1% from last year</span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 p-6">
@@ -410,34 +511,7 @@ export default function AnalyticsPanel() {
                 <Skeleton className="h-[300px] w-full" />
               ) : (
                 <div className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Today's Revenue</p>
-                      <p className="text-2xl font-bold mt-1">$24,500</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+12% from yesterday</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Properties Viewed</p>
-                      <p className="text-2xl font-bold mt-1">342</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+5% from yesterday</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">New Inquiries</p>
-                      <p className="text-2xl font-bold mt-1">28</p>
-                      <div className="flex items-center mt-2 text-xs text-red-500">
-                        <TrendingDown className="h-3 w-3 mr-1" />
-                        <span>-3% from yesterday</span>
-                      </div>
-                    </div>
-                  </div>
+                  <DailyMetricsContent />
                   
                   <div className="h-[200px] w-full flex items-center justify-center bg-muted/20 rounded-md">
                     <BarChart3 className="h-10 w-10 text-muted" />
@@ -460,35 +534,8 @@ export default function AnalyticsPanel() {
                 <Skeleton className="h-[300px] w-full" />
               ) : (
                 <div className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Month Revenue</p>
-                      <p className="text-2xl font-bold mt-1">$493,200</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+8% from last month</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Properties Sold</p>
-                      <p className="text-2xl font-bold mt-1">42</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+12% from last month</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Average Price</p>
-                      <p className="text-2xl font-bold mt-1">$383K</p>
-                      <div className="flex items-center mt-2 text-xs text-red-500">
-                        <TrendingDown className="h-3 w-3 mr-1" />
-                        <span>-2% from last month</span>
-                      </div>
-                    </div>
-                  </div>
-
+                  <MonthlyMetricsContent />
+                  
                   <div className="h-[200px] w-full flex items-center justify-center bg-muted/20 rounded-md">
                     <BarChart3 className="h-10 w-10 text-muted" />
                     <span className="ml-2 text-muted-foreground">Monthly sales chart visualization</span>
@@ -510,35 +557,8 @@ export default function AnalyticsPanel() {
                 <Skeleton className="h-[300px] w-full" />
               ) : (
                 <div className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Annual Revenue</p>
-                      <p className="text-2xl font-bold mt-1">$5.2M</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+15% from last year</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Total Properties Sold</p>
-                      <p className="text-2xl font-bold mt-1">482</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+9% from last year</span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Market Share</p>
-                      <p className="text-2xl font-bold mt-1">24.3%</p>
-                      <div className="flex items-center mt-2 text-xs text-green-500">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        <span>+2.1% from last year</span>
-                      </div>
-                    </div>
-                  </div>
-
+                  <YearlyMetricsContent />
+                  
                   <div className="h-[200px] w-full flex items-center justify-center bg-muted/20 rounded-md">
                     <PieChart className="h-10 w-10 text-muted" />
                     <span className="ml-2 text-muted-foreground">Yearly performance chart visualization</span>
