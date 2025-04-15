@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import {
   QrCode,
   Upload,
   Settings,
-  Bank
+  Building2
 } from 'lucide-react';
 
 const PaymentMethodSetup = () => {
@@ -33,7 +32,7 @@ const PaymentMethodSetup = () => {
       <Tabs defaultValue="bank-transfer" className="space-y-4">
         <TabsList>
           <TabsTrigger value="bank-transfer" className="flex items-center gap-2">
-            <Bank className="h-4 w-4" />
+            <Building2 className="h-4 w-4" />
             Bank Transfer
           </TabsTrigger>
           <TabsTrigger value="card-payments" className="flex items-center gap-2">

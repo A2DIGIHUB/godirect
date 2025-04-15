@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +60,13 @@ export default function AnalyticsPanel() {
       
       if (error) throw error;
       
-      const metrics = data?.[0] || {};
+      // Add default values to prevent TypeScript errors when accessing properties
+      const metrics = data?.[0] || {
+        revenue: 0,
+        completion_percentage: 0,
+        change_percentage: 0
+      };
+      
       return {
         totalRevenue: formatCurrency(metrics.revenue || 0),
         commissions: formatCurrency((metrics.revenue || 0) * 0.09),
@@ -115,7 +122,7 @@ export default function AnalyticsPanel() {
     }
   });
 
-  const isLoading = statsLoading || revenueLoading || paymentsLoading || propertiesLoading;
+  const isLoading = statsLoading || isLoadingRevenue || paymentsLoading || propertiesLoading;
   const hasError = statsError;
 
   // Find specific stats by name
