@@ -27,6 +27,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
 
   // Extract section from path instead of query parameters
   const pathSegments = location.pathname.split('/');
@@ -36,6 +37,29 @@ export default function AdminDashboard() {
   if (currentSection === "admin-dashboard") {
     currentSection = "overview";
   }
+
+  // Check connection status to Supabase
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const { error } = await supabase.from('dashboard_stats').select('id').limit(1);
+        setConnectionError(!!error);
+        if (error) {
+          console.error("Connection error:", error);
+          toast({
+            title: "Connection issue detected",
+            description: "There seems to be a problem connecting to the database",
+            variant: "destructive"
+          });
+        }
+      } catch (err) {
+        console.error("Connection check failed:", err);
+        setConnectionError(true);
+      }
+    };
+    
+    checkConnection();
+  }, [toast]);
 
   useEffect(() => {
     const refreshData = async () => {
@@ -91,16 +115,70 @@ export default function AdminDashboard() {
     profile: <AdminProfile />,
     support: <SupportCenter />,
     system: <SystemConfiguration />,
-    // Add placeholders for previously missing routes
-    "email-templates": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Email Templates</h1><p>Email template management interface will be available soon.</p></div>,
-    "platform-settings": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Platform Settings</h1><p>Platform configuration settings will be available soon.</p></div>,
-    "maintenance": <div className="p-6"><h1 className="text-3xl font-bold mb-4">System Maintenance</h1><p>System maintenance tools will be available soon.</p></div>,
-    "support-tickets": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Support Tickets</h1><p>Support ticket management will be available soon.</p></div>,
-    "knowledge-base": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Knowledge Base</h1><p>Knowledge base articles will be available soon.</p></div>,
-    "team-chat": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Team Chat</h1><p>Team chat interface will be available soon.</p></div>,
-    "reports": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Reports</h1><p>Reporting dashboard will be available soon.</p></div>,
-    "notifications": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Notifications</h1><p>Notification settings and history will be available soon.</p></div>,
+    // Improved placeholders for missing routes
+    "email-templates": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Email Templates</h1>
+      <p className="mb-4">Email template management interface will be available soon.</p>
+      <p className="text-muted-foreground">This page is currently under development. We're working to bring you a comprehensive email template management system soon.</p>
+    </div>,
+    "platform-settings": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Platform Settings</h1>
+      <p className="mb-4">Platform configuration settings will be available soon.</p>
+      <p className="text-muted-foreground">We're currently working on implementing global platform settings. Check back soon for updates.</p>
+    </div>,
+    "maintenance": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">System Maintenance</h1>
+      <p className="mb-4">System maintenance tools will be available soon.</p>
+      <p className="text-muted-foreground">Our team is developing system maintenance tools to help you manage your platform effectively.</p>
+    </div>,
+    "support-tickets": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Support Tickets</h1>
+      <p className="mb-4">Support ticket management will be available soon.</p>
+      <p className="text-muted-foreground">We're implementing a comprehensive support ticket system to help you manage customer inquiries.</p>
+    </div>,
+    "knowledge-base": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Knowledge Base</h1>
+      <p className="mb-4">Knowledge base articles will be available soon.</p>
+      <p className="text-muted-foreground">We're working on a knowledge base system to help your users find information quickly and easily.</p>
+    </div>,
+    "team-chat": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Team Chat</h1>
+      <p className="mb-4">Team chat interface will be available soon.</p>
+      <p className="text-muted-foreground">Our developers are implementing a comprehensive team communication system.</p>
+    </div>,
+    "reports": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Reports</h1>
+      <p className="mb-4">Reporting dashboard will be available soon.</p>
+      <p className="text-muted-foreground">We're developing advanced reporting capabilities to give you insights into your business.</p>
+    </div>,
+    "notifications": <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Notifications</h1>
+      <p className="mb-4">Notification settings and history will be available soon.</p>
+      <p className="text-muted-foreground">We're working on a comprehensive notification system to keep users informed.</p>
+    </div>,
   };
+
+  // Show connection error if there's a problem
+  if (connectionError) {
+    return (
+      <DashboardLayout userType="admin">
+        <div className="p-6 space-y-4">
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle className="flex items-center">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Connection Error
+            </AlertTitle>
+            <AlertDescription>
+              Could not connect to the database. Please check your connection and try again.
+            </AlertDescription>
+          </Alert>
+          <Button onClick={() => window.location.reload()} variant="default">
+            Retry Connection
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout

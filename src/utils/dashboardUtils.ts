@@ -31,21 +31,95 @@ export const fetchDashboardStats = async (): Promise<DashboardStat[]> => {
 
 export const refreshDashboardStats = async (): Promise<{ success: boolean, message: string }> => {
   try {
-    const { data, error } = await supabase.functions.invoke('calculate-dashboard-stats');
+    // Instead of relying on an Edge Function that's failing, 
+    // let's calculate new stats directly from the database tables
     
-    if (error) {
-      console.error("Error refreshing dashboard stats:", error);
-      return { 
-        success: false, 
-        message: error.message || "Failed to refresh dashboard statistics"
-      };
+    // Fetch current stats to use as a baseline
+    const { data: currentStats, error: statsError } = await supabase
+      .from('dashboard_stats')
+      .select('*');
+      
+    if (statsError) throw statsError;
+    
+    // Get counts from relevant tables for basic stats
+    const { count: activeListingsCount, error: listingError } = await supabase
+      .from('properties')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'For Sale');
+      
+    if (listingError) throw listingError;
+    
+    const { count: usersCount, error: usersError } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+      
+    if (usersError) throw usersError;
+    
+    const { count: salesCount, error: salesError } = await supabase
+      .from('sales')
+      .select('*', { count: 'exact', head: true });
+      
+    if (salesError) throw salesError;
+    
+    // Update stats if they exist, or insert new ones if they don't
+    const statsToUpdate = [
+      {
+        stat_name: 'active_listings',
+        stat_value: activeListingsCount.toString(),
+        stat_change: 0, // Calculate change later if needed
+      },
+      {
+        stat_name: 'users_agents',
+        stat_value: usersCount.toString(),
+        stat_change: 0,
+      },
+      {
+        stat_name: 'properties_sold',
+        stat_value: salesCount.toString(),
+        stat_change: 0,
+      },
+    ];
+    
+    // Update each stat in the database
+    for (const stat of statsToUpdate) {
+      const existingStat = currentStats?.find(s => s.stat_name === stat.stat_name);
+      
+      if (existingStat) {
+        // Calculate percentage change
+        const oldValue = parseInt(existingStat.stat_value) || 0;
+        const newValue = parseInt(stat.stat_value) || 0;
+        const percentChange = oldValue > 0 ? 
+          Math.round(((newValue - oldValue) / oldValue) * 100) : 0;
+        
+        // Update existing stat
+        const { error: updateError } = await supabase
+          .from('dashboard_stats')
+          .update({ 
+            stat_value: stat.stat_value, 
+            stat_change: percentChange,
+            updated_at: new Date().toISOString() 
+          })
+          .eq('id', existingStat.id);
+          
+        if (updateError) throw updateError;
+      } else {
+        // Insert new stat
+        const { error: insertError } = await supabase
+          .from('dashboard_stats')
+          .insert({ 
+            ...stat,
+            updated_at: new Date().toISOString() 
+          });
+          
+        if (insertError) throw insertError;
+      }
     }
     
     return { 
       success: true, 
       message: "Dashboard statistics refreshed successfully"
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in refreshDashboardStats:", error);
     return { 
       success: false, 
