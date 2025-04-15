@@ -21,6 +21,9 @@ import UserNotFound from "@/components/dashboard/user/UserNotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { refreshDashboardStats } from "@/utils/dashboardUtils";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 export default function AdminDashboard() {
   const location = useLocation();
