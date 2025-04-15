@@ -12,7 +12,6 @@ import AdminProfile from "@/components/dashboard/admin/AdminProfile";
 import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
 import PaymentProcessing from "@/components/dashboard/admin/PaymentProcessing";
-import { PaymentConfiguration } from "@/components/dashboard/admin/PaymentConfiguration";
 import PaymentMethodSetup from "@/components/dashboard/admin/PaymentMethodSetup";
 import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
 import SupportCenter from "@/components/dashboard/admin/SupportCenter";
@@ -22,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { refreshDashboardStats } from "@/utils/dashboardUtils";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -111,7 +110,6 @@ export default function AdminDashboard() {
     sales: <AdminSales />,
     financial: <FinancialManagement />,
     payments: <PaymentProcessing />,
-    "payment-config": <PaymentConfiguration />,
     "payment-methods": <PaymentMethodSetup />,
     legal: <LegalCompliance />,
     settings: <AdminSettings />,
@@ -167,10 +165,7 @@ export default function AdminDashboard() {
       <DashboardLayout userType="admin">
         <div className="p-6 space-y-4">
           <Alert variant="destructive" className="mb-6">
-            <AlertTitle className="flex items-center">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Connection Error
-            </AlertTitle>
+            <AlertTriangle className="h-4 w-4 mr-2" />
             <AlertDescription>
               Could not connect to the database. Please check your connection and try again.
             </AlertDescription>

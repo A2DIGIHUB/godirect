@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { formatPriceWithCommas } from "@/utils/data";
+import { formatCurrency } from "@/utils/formatUtils";
 import {
   LineChart,
   Line,
@@ -96,7 +96,7 @@ const AgentCommissions = () => {
             <CardTitle className="text-sm font-medium">Total Commission</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPriceWithCommas(totalCommission)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalCommission)}</div>
             <p className="text-xs text-muted-foreground">From 4 property sales</p>
           </CardContent>
         </Card>
@@ -105,7 +105,7 @@ const AgentCommissions = () => {
             <CardTitle className="text-sm font-medium">Pending Commission</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPriceWithCommas(pendingCommission)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(pendingCommission)}</div>
             <p className="text-xs text-muted-foreground">From 2 properties</p>
           </CardContent>
         </Card>
@@ -115,7 +115,7 @@ const AgentCommissions = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatPriceWithCommas(totalCommission / mockCommissions.length)}
+              {formatCurrency(totalCommission / mockCommissions.length)}
             </div>
             <p className="text-xs text-muted-foreground">Per property</p>
           </CardContent>
@@ -143,8 +143,8 @@ const AgentCommissions = () => {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
-                <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, "Commission"]} />
+                <YAxis tickFormatter={(value) => `₦${value / 1000}k`} />
+                <Tooltip formatter={(value) => [formatCurrency(value), "Commission"]} />
                 <Legend />
                 <Line
                   type="monotone"
@@ -187,9 +187,9 @@ const AgentCommissions = () => {
                       {commission.propertyTitle}
                     </a>
                   </TableCell>
-                  <TableCell>{formatPriceWithCommas(commission.salePrice)}</TableCell>
+                  <TableCell>{formatCurrency(commission.salePrice)}</TableCell>
                   <TableCell className="font-semibold">
-                    {formatPriceWithCommas(commission.commission)}
+                    {formatCurrency(commission.commission)}
                   </TableCell>
                   <TableCell>
                     {new Date(commission.date).toLocaleDateString()}

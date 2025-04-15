@@ -86,3 +86,17 @@ export const formatDate = (
     return '';
   }
 };
+
+// Helper function specifically for the project to ensure consistent formatting
+export const formatPriceWithCommas = (price: number | string): string => {
+  // Handle null/undefined/empty values
+  if (price === null || price === undefined || price === '') {
+    return '₦0';
+  }
+  
+  // Convert string to number if needed
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  
+  // Format with Naira symbol and commas
+  return `₦${numPrice.toLocaleString('en-NG')}`;
+};

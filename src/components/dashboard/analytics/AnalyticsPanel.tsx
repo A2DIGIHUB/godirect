@@ -41,7 +41,7 @@ export default function AnalyticsPanel() {
         throw new Error(error.message);
       }
       
-      return data;
+      return data || [];
     }
   });
   
@@ -96,7 +96,7 @@ export default function AnalyticsPanel() {
         throw new Error(error.message);
       }
       
-      return data;
+      return data || [];
     }
   });
 
@@ -118,7 +118,7 @@ export default function AnalyticsPanel() {
         throw new Error(error.message);
       }
       
-      return data;
+      return data || [];
     }
   });
 
@@ -126,8 +126,8 @@ export default function AnalyticsPanel() {
   const hasError = statsError;
 
   // Find specific stats by name
-  const findStatByName = (name) => {
-    if (!dashboardStats) return { stat_value: '0', stat_change: 0 };
+  const findStatByName = (name: string) => {
+    if (!dashboardStats || !Array.isArray(dashboardStats)) return { stat_value: '0', stat_change: 0 };
     const stat = dashboardStats.find(s => s.stat_name === name);
     return stat || { stat_value: '0', stat_change: 0 };
   };
@@ -139,13 +139,13 @@ export default function AnalyticsPanel() {
   const paymentApprovals = findStatByName('payment_approvals');
   const propertiesSold = findStatByName('properties_sold');
 
-  const formatTrendIcon = (change) => {
+  const formatTrendIcon = (change: number) => {
     if (change > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (change < 0) return <TrendingDown className="h-4 w-4 text-red-500" />;
     return null;
   };
 
-  const formatTrendClass = (change) => {
+  const formatTrendClass = (change: number) => {
     if (change > 0) return "text-green-500";
     if (change < 0) return "text-red-500";
     return "text-muted-foreground";
@@ -472,7 +472,7 @@ export default function AnalyticsPanel() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">${(sale.sale_price / 1000).toFixed(1)}k</p>
+                          <p className="font-medium">{formatCurrency(sale.sale_price)}</p>
                           <p className="text-sm text-muted-foreground">
                             {new Date(sale.sale_date).toLocaleDateString()}
                           </p>
